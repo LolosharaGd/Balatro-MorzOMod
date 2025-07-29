@@ -1,0 +1,13 @@
+{
+    "id": "MorzOMod",
+    "name": "Morz'O'Mod",
+    "author": ["LolosharaGd"],
+    "description": "My first test mod.",
+    "prefix": "mrzmd",
+    "main_file": "MorzOMod.lua",
+    "badge_colour": "ffaa00",
+    "dependencies": [
+        "Steamodded (>=1.0.0~BETA-0711a)"
+    ],
+    "version": "1.0.0"
+}
