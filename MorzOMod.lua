@@ -19,10 +19,10 @@ SMODS.Rarity {
     },
     pools = {
         ["Joker"] = true,
-        ["Joker"] = { rate = 0.1 },
+        ["Joker"] = { rate = 0.01 },
     },
     badge_colour = HEX("714AB5"),
-    default_weight = 0.2
+    default_weight = 0.01
 }
 
 SMODS.Joker {
