@@ -1,3 +1,9 @@
+pile_jokers = {
+    "j_mrzmd_gold_pile",
+    "j_mrzmd_silver_pile"
+}
+pile_color = HEX("714AB5")
+
 SMODS.Atlas {
     key = "MorzOMod",
     path = "MorzOMod.png",
@@ -12,6 +18,13 @@ SMODS.Atlas {
     py = 95
 }
 
+SMODS.Atlas {
+    key = "Boosters",
+    path = "Boosters.png",
+    px = 71,
+    py = 95
+}
+
 SMODS.Rarity {
     key = "pile",
     loc_txt = {
@@ -20,9 +33,238 @@ SMODS.Rarity {
     pools = {
         ["Joker"] = true,
         ["Joker"] = { rate = 0.01 },
+        ["Pile"] = true
     },
-    badge_colour = HEX("714AB5"),
+    badge_colour = pile_color,
     default_weight = 0.01
+}
+
+SMODS.Booster {
+    key = "pile_pack_1",
+    loc_txt = {
+        name = "Pile Pack",
+        text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
+        group_name = "Pile pack"
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                1,
+                2,
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    atlas = "Boosters",
+    pos = { x = 0, y = 0 },
+    config = {
+        extra = 2,
+        choose = 1
+    },
+
+    discovered = true,
+    kind = "Pile",
+
+    cost = 8,
+    weight = 0.5 / 2,
+
+    create_card = function(self, card, i)
+        local viable_jokers = {}
+
+        for i,j in ipairs(pile_jokers) do
+            if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
+                viable_jokers[#viable_jokers + 1] = j
+            end
+        end
+
+        local new_card = create_card(
+            "Joker",
+            G.pack_cards,
+            nil,
+            nil,
+            true,
+            false,
+            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            nil
+        )
+
+        return new_card
+    end
+}
+
+SMODS.Booster {
+    key = "pile_pack_2",
+    loc_txt = {
+        name = "Pile Pack",
+        text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
+        group_name = "Pile pack"
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                1,
+                2,
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    atlas = "Boosters",
+    pos = { x = 1, y = 0 },
+    config = {
+        extra = 2,
+        choose = 1
+    },
+
+    discovered = true,
+    kind = "Pile",
+
+    cost = 8,
+    weight = 0.5 / 2,
+
+    create_card = function(self, card, i)
+        local viable_jokers = {}
+
+        for i,j in ipairs(pile_jokers) do
+            if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
+                viable_jokers[#viable_jokers + 1] = j
+            end
+        end
+
+        local new_card = create_card(
+            "Joker",
+            G.pack_cards,
+            nil,
+            nil,
+            true,
+            false,
+            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            nil
+        )
+
+        return new_card
+    end
+}
+
+SMODS.Booster {
+    key = "pile_pack_jumbo",
+    loc_txt = {
+        name = "Pile Pack",
+        text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
+        group_name = "Pile pack"
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                1,
+                4,
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    atlas = "Boosters",
+    pos = { x = 2, y = 0 },
+    config = {
+        extra = 4,
+        choose = 1
+    },
+
+    discovered = true,
+    kind = "Pile",
+
+    cost = 12,
+    weight = 0.4,
+
+    create_card = function(self, card, i)
+        local viable_jokers = {}
+
+        for i,j in ipairs(pile_jokers) do
+            if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
+                viable_jokers[#viable_jokers + 1] = j
+            end
+        end
+
+        local new_card = create_card(
+            "Joker",
+            G.pack_cards,
+            nil,
+            nil,
+            true,
+            false,
+            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            nil
+        )
+
+        return new_card
+    end
+}
+
+SMODS.Booster {
+    key = "pile_pack_mega",
+    loc_txt = {
+        name = "Pile Pack",
+        text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
+        group_name = "Pile pack"
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                2,
+                4,
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    atlas = "Boosters",
+    pos = { x = 3, y = 0 },
+    config = {
+        extra = 4,
+        choose = 2
+    },
+
+    discovered = true,
+    kind = "Pile",
+
+    cost = 16,
+    weight = 0.3,
+
+    create_card = function(self, card, i)
+        local viable_jokers = {}
+
+        for i,j in ipairs(pile_jokers) do
+            if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
+                viable_jokers[#viable_jokers + 1] = j
+            end
+        end
+
+        local new_card = create_card(
+            "Joker",
+            G.pack_cards,
+            nil,
+            nil,
+            true,
+            false,
+            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            nil
+        )
+
+        return new_card
+    end
 }
 
 SMODS.Joker {
