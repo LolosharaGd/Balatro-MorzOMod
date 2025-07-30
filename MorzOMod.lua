@@ -1,6 +1,7 @@
 pile_jokers = {
     "j_mrzmd_gold_pile",
-    "j_mrzmd_silver_pile"
+    "j_mrzmd_silver_pile",
+    "j_mrzmd_copper_pile"
 }
 pile_color = HEX("714AB5")
 
@@ -271,7 +272,11 @@ SMODS.Joker {
     key = "gold_pile",
     loc_txt = {
         name = "Gold Pile",
-        text = { "{C:money}$#1#{} for every card scored", "Increase by {C:money}$#2#{} after the boss blind", "{C:mult}Reset{} to {C:money}$#3#{} after shop reroll" }
+        text = {
+            "{C:money}$#1#{} for every card scored",
+            "Increase by {C:money}$#2#{} after the boss blind",
+            "{C:mult}Reset{} to {C:money}$#3#{} after shop reroll"
+        }
     },
 
     config = {
@@ -302,7 +307,7 @@ SMODS.Joker {
             }
         end
 
-        if context.end_of_round and context.cardarea == G.jokers then
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
             if G.GAME.blind.boss then
                 card.ability.extra.dollars = card.ability.extra.dollars + card.ability.extra.dollars_gain
 
@@ -313,7 +318,7 @@ SMODS.Joker {
             end
         end
 
-        if context.reroll_shop then
+        if context.reroll_shop and not context.blueprint then
             card.ability.extra.dollars = card.ability.extra.start_dollars
 
             return {
@@ -328,7 +333,11 @@ SMODS.Joker {
     key = "silver_pile",
     loc_txt = {
         name = "Silver Pile",
-        text = { "{C:chips}+#1#{} chips for every card scored", "Increase by {C:chips}#2#{} after the blind", "{C:mult}Reset{} to {C:chips}+#3#{} after shop reroll" }
+        text = {
+            "{C:chips}+#1#{} chips for every card scored",
+            "Increase by {C:chips}#2#{} after the blind",
+            "{C:mult}Reset{} to {C:chips}+#3#{} after shop reroll"
+        }
     },
 
     config = {
@@ -359,7 +368,7 @@ SMODS.Joker {
             }
         end
 
-        if context.end_of_round and context.cardarea == G.jokers then
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
             card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
 
             return {
@@ -368,12 +377,71 @@ SMODS.Joker {
             }
         end
 
-        if context.reroll_shop then
+        if context.reroll_shop and not context.blueprint then
             card.ability.extra.chips = card.ability.extra.start_chips
 
             return {
                 message = "Restart!",
                 colour = G.C.CHIPS
+            }
+        end
+    end
+}
+
+SMODS.Joker {
+    key = "copper_pile",
+    loc_txt = {
+        name = "Copper Pile",
+        text = {
+            "{C:mult}+#1#{} mult for every card scored",
+            "Increase by {C:mult}#2#{} after hand played",
+            "{C:mult}Reset{} to {C:mult}+#3#{} after shop reroll"
+        }
+    },
+
+    config = {
+        extra = {
+            start_mult = 3,
+            mult = 3,
+            mult_gain = 3
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain, card.ability.extra.start_mult } }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 2, y = 0 },
+    soul_pos = { x = 2, y = 1 },
+    cost = 6,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
+
+            return {
+                message = "Upgrade!",
+                colour = G.C.MULT
+            }
+        end
+
+        if context.reroll_shop and not context.blueprint then
+            card.ability.extra.mult = card.ability.extra.start_mult
+
+            return {
+                message = "Restart!",
+                colour = G.C.MULT
             }
         end
     end
