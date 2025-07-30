@@ -71,7 +71,7 @@ SMODS.Booster {
     kind = "Pile",
 
     cost = 8,
-    weight = 0.5 / 2,
+    weight = 0.75 / 2,
 
     create_card = function(self, card, i)
         local viable_jokers = {}
@@ -128,7 +128,7 @@ SMODS.Booster {
     kind = "Pile",
 
     cost = 8,
-    weight = 0.5 / 2,
+    weight = 0.75 / 2,
 
     create_card = function(self, card, i)
         local viable_jokers = {}
@@ -157,7 +157,7 @@ SMODS.Booster {
 SMODS.Booster {
     key = "pile_pack_jumbo",
     loc_txt = {
-        name = "Pile Pack",
+        name = "Jumbo Pile Pack",
         text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
         group_name = "Pile pack"
     },
@@ -185,7 +185,7 @@ SMODS.Booster {
     kind = "Pile",
 
     cost = 12,
-    weight = 0.4,
+    weight = 0.5,
 
     create_card = function(self, card, i)
         local viable_jokers = {}
@@ -214,7 +214,7 @@ SMODS.Booster {
 SMODS.Booster {
     key = "pile_pack_mega",
     loc_txt = {
-        name = "Pile Pack",
+        name = "Mega Pile Pack",
         text = { "Select {C:attention}#1#{} out of {C:attention}#2#{}", "{V:1,E:2}Pile{} jokers" },
         group_name = "Pile pack"
     },
@@ -242,7 +242,7 @@ SMODS.Booster {
     kind = "Pile",
 
     cost = 16,
-    weight = 0.3,
+    weight = 0.4,
 
     create_card = function(self, card, i)
         local viable_jokers = {}
