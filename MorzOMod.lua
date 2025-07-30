@@ -275,7 +275,8 @@ SMODS.Joker {
         text = {
             "{C:money}$#1#{} for every card scored",
             "Increase by {C:money}$#2#{} after the boss blind",
-            "{C:mult}Reset{} to {C:money}$#3#{} after shop reroll"
+            "{C:mult}Decrease{} by {C:money}$#2#{} after shop reroll",
+            "{C:inactive,s:0.7}Minimum {C:money,s:0.7}$#3#"
         }
     },
 
@@ -319,10 +320,10 @@ SMODS.Joker {
         end
 
         if context.reroll_shop and not context.blueprint then
-            card.ability.extra.dollars = card.ability.extra.start_dollars
+            card.ability.extra.dollars = math.max(card.ability.extra.start_dollars, card.ability.extra.dollars - card.ability.extra.dollars_gain)
 
             return {
-                message = "Restart!",
+                message = "Degrade!",
                 colour = G.C.MONEY
             }
         end
@@ -336,7 +337,8 @@ SMODS.Joker {
         text = {
             "{C:chips}+#1#{} chips for every card scored",
             "Increase by {C:chips}#2#{} after the blind",
-            "{C:mult}Reset{} to {C:chips}+#3#{} after shop reroll"
+            "{C:mult}Decrease{} by {C:chips}#2#{} after shop reroll",
+            "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#3#"
         }
     },
 
@@ -378,10 +380,10 @@ SMODS.Joker {
         end
 
         if context.reroll_shop and not context.blueprint then
-            card.ability.extra.chips = card.ability.extra.start_chips
+            card.ability.extra.chips = math.max(card.ability.extra.start_chips, card.ability.extra.chips - card.ability.extra.chips_gain)
 
             return {
-                message = "Restart!",
+                message = "Degrade!",
                 colour = G.C.CHIPS
             }
         end
@@ -395,7 +397,8 @@ SMODS.Joker {
         text = {
             "{C:mult}+#1#{} mult for every card scored",
             "Increase by {C:mult}#2#{} after hand played",
-            "{C:mult}Reset{} to {C:mult}+#3#{} after shop reroll"
+            "{C:mult}Decrease{} by {C:mult}#2#{} after shop reroll",
+            "{C:inactive,s:0.7}Minimum {C:mult,s:0.7}#3#"
         }
     },
 
@@ -437,10 +440,10 @@ SMODS.Joker {
         end
 
         if context.reroll_shop and not context.blueprint then
-            card.ability.extra.mult = card.ability.extra.start_mult
+            card.ability.extra.mult = math.max(card.ability.extra.start_mult, card.ability.extra.mult - card.ability.extra.mult_gain)
 
             return {
-                message = "Restart!",
+                message = "Degrade!",
                 colour = G.C.MULT
             }
         end
