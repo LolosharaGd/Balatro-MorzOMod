@@ -1,3 +1,5 @@
+-- GLOBAL VARIABLES
+-- I'm sure this is not the way to do it, but I don't know better :>
 pile_jokers = {
     "j_mrzmd_gold_pile",
     "j_mrzmd_silver_pile",
@@ -5,6 +7,10 @@ pile_jokers = {
 }
 pile_color = HEX("714AB5")
 
+-- OPTIONAL FEATURES
+SMODS.optional_features = { cardareas = {}, post_trigger = true, quantum_enhancements = true, retrigger_joker = true }
+
+-- MAIN ATLAS
 SMODS.Atlas {
     key = "MorzOMod",
     path = "MorzOMod.png",
@@ -12,6 +18,7 @@ SMODS.Atlas {
     py = 95
 }
 
+-- PILES ATLAS
 SMODS.Atlas {
     key = "Piles",
     path = "Piles.png",
@@ -19,6 +26,7 @@ SMODS.Atlas {
     py = 95
 }
 
+-- BOOSTERS ATLAS
 SMODS.Atlas {
     key = "Boosters",
     path = "Boosters.png",
@@ -26,6 +34,7 @@ SMODS.Atlas {
     py = 95
 }
 
+-- PILE RARITY
 SMODS.Rarity {
     key = "pile",
     loc_txt = {
@@ -40,6 +49,7 @@ SMODS.Rarity {
     default_weight = 0.01
 }
 
+-- NORMAL BOOSTER 1
 SMODS.Booster {
     key = "pile_pack_1",
     loc_txt = {
@@ -97,6 +107,7 @@ SMODS.Booster {
     end
 }
 
+-- NORMAL BOOSTER 2
 SMODS.Booster {
     key = "pile_pack_2",
     loc_txt = {
@@ -154,6 +165,7 @@ SMODS.Booster {
     end
 }
 
+-- JUMBO BOOSTER
 SMODS.Booster {
     key = "pile_pack_jumbo",
     loc_txt = {
@@ -211,6 +223,7 @@ SMODS.Booster {
     end
 }
 
+-- MEGA BOOSTER
 SMODS.Booster {
     key = "pile_pack_mega",
     loc_txt = {
@@ -268,6 +281,7 @@ SMODS.Booster {
     end
 }
 
+-- JOKER - GOLD PILE
 SMODS.Joker {
     key = "gold_pile",
     loc_txt = {
@@ -296,7 +310,7 @@ SMODS.Joker {
     atlas = "Piles",
     pos = { x = 0, y = 0 },
     soul_pos = { x = 0, y = 1 },
-    cost = 4,
+    cost = 6,
     blueprint_compat = true,
 
     discovered = true,
@@ -330,6 +344,7 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - SILVER PILE
 SMODS.Joker {
     key = "silver_pile",
     loc_txt = {
@@ -358,7 +373,7 @@ SMODS.Joker {
     atlas = "Piles",
     pos = { x = 1, y = 0 },
     soul_pos = { x = 1, y = 1 },
-    cost = 5,
+    cost = 8,
     blueprint_compat = true,
 
     discovered = true,
@@ -390,6 +405,7 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - COPPER PILE
 SMODS.Joker {
     key = "copper_pile",
     loc_txt = {
@@ -418,7 +434,7 @@ SMODS.Joker {
     atlas = "Piles",
     pos = { x = 2, y = 0 },
     soul_pos = { x = 2, y = 1 },
-    cost = 6,
+    cost = 10,
     blueprint_compat = true,
 
     discovered = true,
@@ -450,6 +466,74 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - HYDROGEN PILE
+SMODS.Joker {
+    key = "hydrogen_pile",
+    loc_txt = {
+        name = "Hydrogen Pile",
+        text = {
+            "{C:attention}Retrigger{} everything {C:attention}#1#{} time(s)"
+        },
+        unlock = {
+            "Have at least {C:attention}5 {V:1}Pile{} jokers at once"
+        }
+    },
+
+    config = {
+        extra = {
+            retriggers = 1
+        },
+
+        immutable = {
+            hydrogen_not_retrigerrable = true
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.retriggers,
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 3, y = 0 },
+    soul_pos = { x = 3, y = 1 },
+    cost = 20,
+    blueprint_compat = true,
+
+    --unlocked = false,
+    discovered = true, -- Testing
+
+    calculate = function(self, card, context)
+        if context.repetition and context.cardarea == G.play then
+            return {
+                repetitions = 1,
+                message = "Again!",
+                card = card,
+                colour = pile_color
+            }
+        end
+
+        if context.retrigger_joker_check
+            and not context.retrigger_joker
+            and not context.other_card.ability.immutable.hydrogen_not_retrigerrable
+        then
+            return {
+                repetitions = 1,
+                message = "Again!",
+                colour = pile_color
+            }
+        end
+    end
+}
+
+-- JOKER - ANARCHIST
 SMODS.Joker {
     key = "anarchist",
     loc_txt = {
@@ -499,6 +583,7 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - WILD JOKER
 SMODS.Joker {
     key = "wild_joker",
     loc_txt = {
@@ -554,6 +639,7 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - GOLDEN STRING
 SMODS.Joker {
     key = "golden_string",
     loc_txt = {
