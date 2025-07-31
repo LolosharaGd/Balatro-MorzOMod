@@ -1,11 +1,45 @@
+-- FUNCTIONS
+-- I don't know if they exist already but who cares
+sum_list = function(list)
     local total = 0
+
+    for i,v in ipairs(list) do
+        total = total + v
+    end
+
+    return total
+end
+
+pseudorandom_element_weighed = function(list, weights, seed)
+    if #list == #weights then
+        local total = sum_list(weights)
+        local total_index = pseudorandom(seed) * total
+
+        for i,v in ipairs(weights) do
+            if total_index <= v then
+                return list[i]
+            else
+                total_index = total_index - v
+            end
+        end
+    else
+        return list[1]
+    end
+end
 
 -- GLOBAL VARIABLES
 -- I'm sure this is not the way to do it, but I don't know better :>
 pile_jokers = {
     "j_mrzmd_gold_pile",
     "j_mrzmd_silver_pile",
-    "j_mrzmd_copper_pile"
+    "j_mrzmd_copper_pile",
+    "j_mrzmd_hydrogen_pile"
+}
+pile_jokers_weights = {
+    1,
+    1.2,
+    1,
+    0.1
 }
 pile_color = HEX("714AB5")
 
@@ -87,10 +121,12 @@ SMODS.Booster {
 
     create_card = function(self, card, i)
         local viable_jokers = {}
+        local viable_joker_weights = {}
 
         for i,j in ipairs(pile_jokers) do
             if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
                 viable_jokers[#viable_jokers + 1] = j
+                viable_joker_weights[#viable_joker_weights + 1] = pile_jokers_weights[i]
             end
         end
 
@@ -101,7 +137,7 @@ SMODS.Booster {
             nil,
             true,
             false,
-            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "pilebooster1"..G.GAME.round_resets.ante),
             nil
         )
 
@@ -145,10 +181,12 @@ SMODS.Booster {
 
     create_card = function(self, card, i)
         local viable_jokers = {}
+        local viable_joker_weights = {}
 
         for i,j in ipairs(pile_jokers) do
             if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
                 viable_jokers[#viable_jokers + 1] = j
+                viable_joker_weights[#viable_joker_weights + 1] = pile_jokers_weights[i]
             end
         end
 
@@ -159,7 +197,7 @@ SMODS.Booster {
             nil,
             true,
             false,
-            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "pilebooster1"..G.GAME.round_resets.ante),
             nil
         )
 
@@ -203,10 +241,12 @@ SMODS.Booster {
 
     create_card = function(self, card, i)
         local viable_jokers = {}
+        local viable_joker_weights = {}
 
         for i,j in ipairs(pile_jokers) do
             if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
                 viable_jokers[#viable_jokers + 1] = j
+                viable_joker_weights[#viable_joker_weights + 1] = pile_jokers_weights[i]
             end
         end
 
@@ -217,7 +257,7 @@ SMODS.Booster {
             nil,
             true,
             false,
-            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "pilebooster1"..G.GAME.round_resets.ante),
             nil
         )
 
@@ -261,10 +301,12 @@ SMODS.Booster {
 
     create_card = function(self, card, i)
         local viable_jokers = {}
+        local viable_joker_weights = {}
 
         for i,j in ipairs(pile_jokers) do
             if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
                 viable_jokers[#viable_jokers + 1] = j
+                viable_joker_weights[#viable_joker_weights + 1] = pile_jokers_weights[i]
             end
         end
 
@@ -275,7 +317,7 @@ SMODS.Booster {
             nil,
             true,
             false,
-            pseudorandom_element(viable_jokers, pseudoseed("pilebooster"..G.GAME.round_resets.ante)),
+            pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "pilebooster1"..G.GAME.round_resets.ante),
             nil
         )
 
@@ -474,7 +516,8 @@ SMODS.Joker {
     loc_txt = {
         name = "Hydrogen Pile",
         text = {
-            "{C:attention}Retrigger{} everything {C:attention}#1#{} time(s)"
+            "{C:attention,E:1}Retrigger{} everything {V:1,E:1}#1#{} time(s)",
+            "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Hydrogen Piles"
         },
         unlock = {
             "Have at least {C:attention}5 {V:1}Pile{} jokers at once"
@@ -487,14 +530,15 @@ SMODS.Joker {
         },
 
         immutable = {
+            max_retriggers = 50,
             hydrogen_not_retrigerrable = true
-        }
+        },
     },
-
+    
     loc_vars = function(self, info_queue, card)
         return {
             vars = {
-                card.ability.extra.retriggers,
+                math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 colours = {
                     pile_color
                 }
@@ -513,9 +557,9 @@ SMODS.Joker {
     discovered = true, -- Testing
 
     calculate = function(self, card, context)
-        if context.repetition and context.cardarea == G.play then
+        if context.repetition then
             return {
-                repetitions = 1,
+                repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 message = "Again!",
                 card = card,
                 colour = pile_color
@@ -524,10 +568,10 @@ SMODS.Joker {
 
         if context.retrigger_joker_check
             and not context.retrigger_joker
-            and not context.other_card.ability.immutable.hydrogen_not_retrigerrable
+            and not (context.other_card.ability.immutable and context.other_card.ability.immutable.hydrogen_not_retrigerrable)
         then
             return {
-                repetitions = 1,
+                repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 message = "Again!",
                 colour = pile_color
             }
