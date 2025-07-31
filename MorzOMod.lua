@@ -1,3 +1,14 @@
+---- TODO
+--- Joker: Gallium Pile
+-- X(X) mult for every card scored
+-- Decrease by 0.25 after hand played
+-- Destroy when Xmult reaches 1
+-- Start with 3
+--- Joker: No Pile
+-- Create a random Pile joker after 5 rounds
+-- Random created Pile joker is more likely to be more rare
+-- Cannot be retriggered with Hydrogen Pile
+
 -- FUNCTIONS
 -- I don't know if they exist already but who cares
 sum_list = function(list)
@@ -40,6 +51,12 @@ pile_jokers_weights = {
     1.2,
     1,
     0.1
+}
+pile_jokers_weights_rarer = {
+    0.75,
+    0.9,
+    0.75,
+    0.15
 }
 pile_color = HEX("714AB5")
 
@@ -333,7 +350,7 @@ SMODS.Joker {
         text = {
             "{C:money}$#1#{} for every card scored",
             "Increase by {C:money}$#2#{} after the boss blind",
-            "{C:mult}Decrease{} by {C:money}$#2#{} after shop reroll",
+            "{C:red}Decrease{} by {C:money}$#2#{} after shop reroll",
             "{C:inactive,s:0.7}Minimum {C:money,s:0.7}$#3#"
         }
     },
@@ -396,7 +413,7 @@ SMODS.Joker {
         text = {
             "{C:chips}+#1#{} chips for every card scored",
             "Increase by {C:chips}#2#{} after the blind",
-            "{C:mult}Decrease{} by {C:chips}#2#{} after shop reroll",
+            "{C:red}Decrease{} by {C:chips}#2#{} after shop reroll",
             "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#3#"
         }
     },
@@ -457,7 +474,7 @@ SMODS.Joker {
         text = {
             "{C:mult}+#1#{} mult for every card scored",
             "Increase by {C:mult}#2#{} after hand played",
-            "{C:mult}Decrease{} by {C:mult}#2#{} after shop reroll",
+            "{C:red}Decrease{} by {C:mult}#2#{} after shop reroll",
             "{C:inactive,s:0.7}Minimum {C:mult,s:0.7}#3#"
         }
     },
@@ -574,6 +591,79 @@ SMODS.Joker {
                 repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 message = "Again!",
                 colour = pile_color
+            }
+        end
+    end
+}
+
+-- JOKER - TITANIUM PILE
+SMODS.Joker {
+    key = "titanium_pile",
+    loc_txt = {
+        name = "Titanium Pile",
+        text = {
+            "{C:chips}+#1#{} chips for every card scored",
+            "{C:red}Decrease{} by {C:chips}#2#{} after hand played",
+            "for each {C:attention}card scored",
+            "Increase by {C:chips}#3#{} after round",
+            "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#4#"
+        }
+    },
+
+    config = {
+        extra = {
+            start_chips = 10,
+            chips = 10,
+            chips_gain = 10,
+            chips_decrease = 2
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.chips,
+                card.ability.extra.chips_decrease,
+                card.ability.extra.chips_gain,
+                card.ability.extra.start_chips
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 4, y = 0 },
+    soul_pos = { x = 4, y = 1 },
+    cost = 6,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                chips = card.ability.extra.chips
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips - (card.ability.extra.chips_decrease * #context.scoring_hand)
+            card.ability.extra.chips = math.max(card.ability.extra.chips, card.ability.extra.start_chips)
+
+            if #context.scoring_hand > 0 then
+                return {
+                    message = "Degrade!",
+                    colour = G.C.CHIPS
+                }
+            end
+        end
+
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
+
+            return {
+                message = "Upgrade!",
+                colour = G.C.CHIPS
             }
         end
     end
