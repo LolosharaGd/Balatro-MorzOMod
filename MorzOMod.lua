@@ -1,3 +1,5 @@
+    local total = 0
+
 -- GLOBAL VARIABLES
 -- I'm sure this is not the way to do it, but I don't know better :>
 pile_jokers = {
