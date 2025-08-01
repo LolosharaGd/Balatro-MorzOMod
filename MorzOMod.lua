@@ -397,7 +397,7 @@ SMODS.Joker {
                 card.ability.extra.dollars = card.ability.extra.dollars + card.ability.extra.dollars_gain
 
                 return {
-                    message = "Upgrade!",
+                    message = "+" .. card.ability.extra.dollars_gain,
                     colour = G.C.MONEY
                 }
             end
@@ -407,7 +407,7 @@ SMODS.Joker {
             card.ability.extra.dollars = math.max(card.ability.extra.start_dollars, card.ability.extra.dollars - card.ability.extra.dollars_gain)
 
             return {
-                message = "Degrade!",
+                message = "-" .. card.ability.extra.dollars_gain,
                 colour = G.C.MONEY
             }
         end
@@ -459,7 +459,7 @@ SMODS.Joker {
             card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
 
             return {
-                message = "Upgrade!",
+                message = "+" .. card.ability.extra.chips_gain,
                 colour = G.C.CHIPS
             }
         end
@@ -468,7 +468,7 @@ SMODS.Joker {
             card.ability.extra.chips = math.max(card.ability.extra.start_chips, card.ability.extra.chips - card.ability.extra.chips_gain)
 
             return {
-                message = "Degrade!",
+                message = "-" .. card.ability.extra.chips_gain,
                 colour = G.C.CHIPS
             }
         end
@@ -520,7 +520,7 @@ SMODS.Joker {
             card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
 
             return {
-                message = "Upgrade!",
+                message = "+" .. card.ability.extra.mult_gain,
                 colour = G.C.MULT
             }
         end
@@ -529,7 +529,7 @@ SMODS.Joker {
             card.ability.extra.mult = math.max(card.ability.extra.start_mult, card.ability.extra.mult - card.ability.extra.mult_gain)
 
             return {
-                message = "Degrade!",
+                message = "-" .. card.ability.extra.mult_gain,
                 colour = G.C.MULT
             }
         end
@@ -672,7 +672,7 @@ SMODS.Joker {
             card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
 
             return {
-                message = "Upgrade!",
+                message = "+" .. card.ability.extra.chips_gain,
                 colour = G.C.CHIPS
             }
         end
