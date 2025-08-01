@@ -108,11 +108,11 @@ SMODS.Rarity {
     },
     pools = {
         ["Joker"] = true,
-        ["Joker"] = { rate = 0.01 },
+        ["Joker"] = { rate = 0 },
         ["Pile"] = true
     },
     badge_colour = pile_color,
-    default_weight = 0.01
+    default_weight = 0
 }
 
 -- NORMAL BOOSTER 1
