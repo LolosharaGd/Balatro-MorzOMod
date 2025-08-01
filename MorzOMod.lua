@@ -4,10 +4,6 @@
 -- Decrease by 0.25 after hand played
 -- Destroy when Xmult reaches 1
 -- Start with 3
---- Joker: No Pile
--- Create a random Pile joker after 5 rounds
--- Random created Pile joker is more likely to be more rare
--- Cannot be retriggered with Hydrogen Pile
 
 -- FUNCTIONS
 -- I don't know if they exist already but who cares
@@ -44,19 +40,22 @@ pile_jokers = {
     "j_mrzmd_gold_pile",
     "j_mrzmd_silver_pile",
     "j_mrzmd_copper_pile",
-    "j_mrzmd_hydrogen_pile"
+    "j_mrzmd_hydrogen_pile",
+    "j_mrzmd_titanium_pile"
 }
 pile_jokers_weights = {
     1,
     1.2,
     1,
-    0.1
+    0.1,
+    0.9
 }
-pile_jokers_weights_rarer = {
+pile_jokers_weights_mopile = {
     0.75,
     0.9,
     0.75,
-    0.15
+    0.15,
+    0.8
 }
 pile_color = HEX("714AB5")
 
@@ -652,7 +651,7 @@ SMODS.Joker {
 
             if #context.scoring_hand > 0 then
                 return {
-                    message = "Degrade!",
+                    message = "-" .. (card.ability.extra.chips_decrease * #context.scoring_hand),
                     colour = G.C.CHIPS
                 }
             end
@@ -665,6 +664,109 @@ SMODS.Joker {
                 message = "Upgrade!",
                 colour = G.C.CHIPS
             }
+        end
+    end
+}
+
+-- JOKER - NO PILE
+SMODS.Joker {
+    key = "no_pile",
+    loc_txt = {
+        name = "No Pile",
+        text = {
+            "Create a random {V:1}Pile joker{} after {C:attention}5 {C:inactive}(#1#){} rounds"
+        }
+    },
+
+    config = {
+        extra = {
+            rounds_left = 5
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.rounds_left,
+                colours = {
+                    pile_color
+                }
+            },
+
+            immutable = {
+                hydrogen_not_retrigerrable = true
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 5, y = 0 },
+    soul_pos = { x = 5, y = 1 },
+    cost = 10,
+    blueprint_compat = false,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.rounds_left = card.ability.extra.rounds_left - 1
+            local message = card.ability.extra.rounds_left .. ""
+
+            if card.ability.extra.rounds_left <= 0 then
+                message = "Yes Pile!"
+
+                local viable_jokers = {}
+                local viable_joker_weights = {}
+
+                for i,j in ipairs(pile_jokers_nopile) do
+                    if next(find_joker("Showman")) or not G.GAME.used_jokers[j] then
+                        viable_jokers[#viable_jokers + 1] = j
+                        viable_joker_weights[#viable_joker_weights + 1] = pile_jokers_weights_nopile[i]
+                    end
+                end
+
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = message })
+
+                local new_card = create_card(
+                    "Joker",
+                    G.jokers,
+                    nil,
+                    nil,
+                    true,
+                    false,
+                    pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "nopile"..G.GAME.round_resets.ante),
+                    nil
+                )
+                new_card:add_to_deck()
+				G.jokers:emplace(new_card)
+				new_card:start_materialize()
+
+                -- Literally copied from example mod gross michael 2 :>
+                G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+            else
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = message })
+            end
         end
     end
 }
