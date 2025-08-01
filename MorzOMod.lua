@@ -41,14 +41,24 @@ pile_jokers = {
     "j_mrzmd_silver_pile",
     "j_mrzmd_copper_pile",
     "j_mrzmd_hydrogen_pile",
-    "j_mrzmd_titanium_pile"
+    "j_mrzmd_titanium_pile",
+    "j_mrzmd_no_pile"
 }
 pile_jokers_weights = {
     1,
     1.2,
     1,
     0.1,
+    0.9,
     0.9
+}
+
+pile_jokers_nopile = {
+    "j_mrzmd_gold_pile",
+    "j_mrzmd_silver_pile",
+    "j_mrzmd_copper_pile",
+    "j_mrzmd_hydrogen_pile",
+    "j_mrzmd_titanium_pile"
 }
 pile_jokers_weights_mopile = {
     0.75,
@@ -567,13 +577,13 @@ SMODS.Joker {
     pos = { x = 3, y = 0 },
     soul_pos = { x = 3, y = 1 },
     cost = 20,
-    blueprint_compat = true,
+    blueprint_compat = false,
 
     --unlocked = false,
     discovered = true, -- Testing
 
     calculate = function(self, card, context)
-        if context.repetition then
+        if context.repetition and not context.blueprint then
             return {
                 repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 message = "Again!",
@@ -585,6 +595,7 @@ SMODS.Joker {
         if context.retrigger_joker_check
             and not context.retrigger_joker
             and not (context.other_card.ability.immutable and context.other_card.ability.immutable.hydrogen_not_retrigerrable)
+            and not context.blueprint
         then
             return {
                 repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
@@ -674,7 +685,7 @@ SMODS.Joker {
     loc_txt = {
         name = "No Pile",
         text = {
-            "Create a random {V:1}Pile joker{} after {C:attention}5 {C:inactive}(#1#){} rounds"
+            "Create a random {V:1,E:2}Pile joker{} after {C:attention}5 {C:inactive}(#1#){} rounds"
         }
     },
 
