@@ -1,9 +1,9 @@
 ---- TODO
---- Joker: Gallium Pile
--- X(X) mult for every card scored
--- Decrease by 0.25 after hand played
--- Destroy when Xmult reaches 1
--- Start with 3
+--- Joker: Helium Pile
+-- Retrigger every joker
+-- Doesn't retrigger other retrigger piles
+--- Joker: Oxygen Pile
+-- Retrigger every playing card
 
 -- FUNCTIONS
 -- I don't know if they exist already but who cares
@@ -42,7 +42,8 @@ pile_jokers = {
     "j_mrzmd_copper_pile",
     "j_mrzmd_hydrogen_pile",
     "j_mrzmd_titanium_pile",
-    "j_mrzmd_no_pile"
+    "j_mrzmd_no_pile",
+    "j_mrzmd_gallium_pile"
 }
 pile_jokers_weights = {
     1,
@@ -50,7 +51,8 @@ pile_jokers_weights = {
     1,
     0.1,
     0.9,
-    0.9
+    1,
+    1.15
 }
 
 pile_jokers_nopile = {
@@ -58,18 +60,21 @@ pile_jokers_nopile = {
     "j_mrzmd_silver_pile",
     "j_mrzmd_copper_pile",
     "j_mrzmd_hydrogen_pile",
-    "j_mrzmd_titanium_pile"
+    "j_mrzmd_titanium_pile",
+    "j_mrzmd_gallium_pile"
 }
-pile_jokers_weights_mopile = {
+pile_jokers_weights_nopile = {
     0.75,
     0.9,
     0.75,
     0.15,
-    0.8
+    0.8,
+    0.85
 }
 pile_color = HEX("714AB5")
 
 -- OPTIONAL FEATURES
+-- Because of course you need to enable them
 SMODS.optional_features = { cardareas = {}, post_trigger = true, quantum_enhancements = true, retrigger_joker = true }
 
 -- MAIN ATLAS
@@ -543,7 +548,7 @@ SMODS.Joker {
         name = "Hydrogen Pile",
         text = {
             "{C:attention,E:1}Retrigger{} everything {V:1,E:1}#1#{} time(s)",
-            "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Hydrogen Piles"
+            "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Retriggering Piles"
         },
         unlock = {
             "Have at least {C:attention}5 {V:1}Pile{} jokers at once"
@@ -557,7 +562,7 @@ SMODS.Joker {
 
         immutable = {
             max_retriggers = 50,
-            hydrogen_not_retrigerrable = true
+            pile_not_retrigerrable = true
         },
     },
     
@@ -577,7 +582,7 @@ SMODS.Joker {
     pos = { x = 3, y = 0 },
     soul_pos = { x = 3, y = 1 },
     cost = 20,
-    blueprint_compat = false,
+    eternal_compat = false,
 
     --unlocked = false,
     discovered = true, -- Testing
@@ -594,7 +599,7 @@ SMODS.Joker {
 
         if context.retrigger_joker_check
             and not context.retrigger_joker
-            and not (context.other_card.ability.immutable and context.other_card.ability.immutable.hydrogen_not_retrigerrable)
+            and not (context.other_card.ability.immutable and context.other_card.ability.immutable.pile_not_retrigerrable)
             and not context.blueprint
         then
             return {
@@ -705,7 +710,7 @@ SMODS.Joker {
             },
 
             immutable = {
-                hydrogen_not_retrigerrable = true
+                pile_not_retrigerrable = true
             }
         }
     end,
@@ -777,6 +782,82 @@ SMODS.Joker {
 				}))
             else
                 card_eval_status_text(card, "extra", nil, nil, nil, { message = message })
+            end
+        end
+    end
+}
+
+-- JOKER - GALLIUM PILE
+SMODS.Joker {
+    key = "gallium_pile",
+    loc_txt = {
+        name = "Gallium Pile",
+        text = {
+            "{X:mult,C:white}X#1#{} mult for every card scored",
+            "Decrease by {X:mult,C:white}X#2#{} after hand played",
+            "{C:inactive,s:0.7}Destroy when {X:mult,C:white,s:0.7}Xmult {C:inactive,s:0.7} reaches {X:mult,C:white,s:0.7}X1"
+        }
+    },
+
+    config = {
+        extra = {
+            xmult = 3,
+            xmult_decrease = 0.25
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.xmult, card.ability.extra.xmult_decrease } }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 0, y = 2 },
+    soul_pos = { x = 0, y = 3 },
+    cost = 8,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                xmult = card.ability.extra.xmult
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.xmult = card.ability.extra.xmult - card.ability.extra.xmult_decrease
+
+            if card.ability.extra.xmult <= 1 then
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = "Melted!" })
+
+                G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+            else
+                return {
+                    message = "-X" .. card.ability.extra.xmult_decrease,
+                    colour = G.C.MULT
+                }
             end
         end
     end
