@@ -1,9 +1,8 @@
 ---- TODO
---- Joker: Helium Pile
--- Retrigger every joker
--- Doesn't retrigger other retrigger piles
 --- Joker: Oxygen Pile
 -- Retrigger every playing card
+--- Joker: Counterpart to Gold Pile
+--- Joker: Counterpart to Copper Pile
 
 -- FUNCTIONS
 -- I don't know if they exist already but who cares
@@ -597,6 +596,67 @@ SMODS.Joker {
             }
         end
 
+        if context.retrigger_joker_check
+            and not context.retrigger_joker
+            and not (context.other_card.ability.immutable and context.other_card.ability.immutable.pile_not_retrigerrable)
+            and not context.blueprint
+        then
+            return {
+                repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
+                message = "Again!",
+                colour = pile_color
+            }
+        end
+    end
+}
+
+-- JOKER - HELIUM PILE
+SMODS.Joker {
+    key = "helium_pile",
+    loc_txt = {
+        name = "Helium Pile",
+        text = {
+            "{C:attention,E:1}Retrigger{} every {C:attention}joker {V:1,E:1}#1#{} time(s)",
+            "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Retriggering Piles"
+        },
+        unlock = {
+            "Get it through {V:1}Hydrogen Pile"
+        }
+    },
+
+    config = {
+        extra = {
+            retriggers = 1
+        },
+
+        immutable = {
+            max_retriggers = 50,
+            pile_not_retrigerrable = true
+        },
+    },
+    
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 1, y = 2 },
+    soul_pos = { x = 1, y = 3 },
+    cost = 18,
+    eternal_compat = false,
+
+    --unlocked = false,
+    discovered = true, -- Testing
+
+    calculate = function(self, card, context)
         if context.retrigger_joker_check
             and not context.retrigger_joker
             and not (context.other_card.ability.immutable and context.other_card.ability.immutable.pile_not_retrigerrable)
