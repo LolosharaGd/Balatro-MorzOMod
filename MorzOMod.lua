@@ -544,13 +544,16 @@ SMODS.Joker {
         name = "Hydrogen Pile",
         text = {
             "{V:1,E:1}Retrigger{} everything {V:1,E:1}#1#{} time(s)",
+            "{C:green,s:0.9}#2# in #3#{} chance to {C:red,s:0.9}degrade{s:0.9} into",
+            "{V:1,E:2,s:0.9}Helium{s:0.9} or {V:1,E:2,s:0.9}Oxygen Pile{s:0.9} at the end of round",
             "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Retriggering Piles"
         }
     },
 
     config = {
         extra = {
-            retriggers = 1
+            retriggers = 1,
+            odds = 4,
         },
 
         immutable = {
@@ -563,6 +566,8 @@ SMODS.Joker {
         return {
             vars = {
                 math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
+                (G.GAME.probabilities.normal or 1),
+                card.ability.extra.odds,
                 colours = {
                     pile_color
                 }
@@ -599,6 +604,54 @@ SMODS.Joker {
                 message = "Again!",
                 colour = pile_color
             }
+        end
+
+        if context.end_of_round and context.cardarea == G.jokers then
+            if pseudorandom("hydrogendestroy"..G.GAME.round_resets.ante) < G.GAME.probabilities.normal / card.ability.extra.odds then
+                local viable_jokers = { "j_mrzmd_helium_pile", "j_mrzmd_oxygen_pile" }
+                local viable_joker_weights = { 1, 1 }
+
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = "Degrade!" })
+
+                local new_card = create_card(
+                    "Joker",
+                    G.jokers,
+                    nil,
+                    nil,
+                    true,
+                    false,
+                    pseudorandom_element_weighed(viable_jokers, viable_joker_weights, "hydrogendegrade"..G.GAME.round_resets.ante),
+                    nil
+                )
+                new_card:add_to_deck()
+				G.jokers:emplace(new_card)
+				new_card:start_materialize()
+
+                -- Literally copied from example mod gross michael 2 :>
+                G.E_MANAGER:add_event(Event({
+					func = function()
+						play_sound('tarot1')
+						card.T.r = -0.2
+						card:juice_up(0.3, 0.4)
+						card.states.drag.is = true
+						card.children.center.pinch.x = true
+						G.E_MANAGER:add_event(Event({
+							trigger = 'after',
+							delay = 0.3,
+							blockable = false,
+							func = function()
+								G.jokers:remove_card(card)
+								card:remove()
+								card = nil
+								return true;
+							end
+						}))
+						return true
+					end
+				}))
+            else
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = "Safe!" })
+            end
         end
     end
 }
@@ -793,7 +846,8 @@ SMODS.Joker {
     loc_txt = {
         name = "No Pile",
         text = {
-            "Create a random {V:1,E:2}Pile joker{} after {C:attention}5 {C:inactive}(#1#){} rounds"
+            "Create a random {V:1,E:2}Pile joker{} after {C:attention}5 {C:inactive}(#1#){} rounds",
+            "{C:inactive}Created joker is more likely to be more rare"
         }
     },
 
