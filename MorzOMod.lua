@@ -1,6 +1,4 @@
 ---- TODO
---- Joker: Counterpart to Copper Pile
---- Bronze Pile
 
 -- FUNCTIONS
 -- I don't know if they exist already but who cares
@@ -38,18 +36,22 @@ pile_jokers = {
     "j_mrzmd_silver_pile",
     "j_mrzmd_copper_pile",
     "j_mrzmd_hydrogen_pile",
+    "j_mrzmd_brass_pile",
     "j_mrzmd_titanium_pile",
+    "j_mrzmd_bronze_pile",
     "j_mrzmd_no_pile",
     "j_mrzmd_gallium_pile"
 }
 pile_jokers_weights = {
-    1,
-    1.2,
-    1,
-    0.1,
-    0.9,
-    1,
-    1.15
+    1,    -- Gold
+    1.2,  -- Silver
+    1,    -- Copper
+    0.1,  -- Hydrogen
+    1,    -- Brass
+    0.9,  -- Titanium
+    0.85, -- Bronze
+    1,    -- No Pile
+    1.15  -- Gallium
 }
 
 pile_jokers_nopile = {
@@ -57,16 +59,20 @@ pile_jokers_nopile = {
     "j_mrzmd_silver_pile",
     "j_mrzmd_copper_pile",
     "j_mrzmd_hydrogen_pile",
+    "j_mrzmd_brass_pile",
     "j_mrzmd_titanium_pile",
+    "j_mrzmd_bronze_pile",
     "j_mrzmd_gallium_pile"
 }
 pile_jokers_weights_nopile = {
-    0.75,
-    0.9,
-    0.75,
-    0.15,
-    0.8,
-    0.85
+    0.75, -- Gold
+    0.9,  -- Silver
+    0.75, -- Copper
+    0.15, -- Hydrogen
+    0.8,  -- Brass
+    0.8,  -- Titanium
+    0.75, -- Bronze
+    0.85  -- Gallium
 }
 pile_color = HEX("714AB5")
 
@@ -537,6 +543,233 @@ SMODS.Joker {
     end
 }
 
+-- JOKER - BRASS PILE
+SMODS.Joker {
+    key = "brass_pile",
+    loc_txt = {
+        name = "Brass Pile",
+        text = {
+            "{C:money}$#1#{} for every card scored",
+            "{C:red}Decrease{} by {C:money}$#2#{} after hand played",
+            "if {C:attention}scored hand{} contains {C:attention}#3#{} or more cards",
+            "Increase by {C:money}$#2#{} after boss blind",
+            "{C:inactive,s:0.7}Minimum {C:money,s:0.7}#4#"
+        }
+    },
+
+    config = {
+        extra = {
+            start_dollars = 1,
+            dollars = 1,
+            dollars_gain = 2,
+            card_threshold = 4
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.dollars,
+                card.ability.extra.dollars_gain,
+                card.ability.extra.card_threshold,
+                card.ability.extra.start_dollars
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 3, y = 2 },
+    soul_pos = { x = 3, y = 3 },
+    cost = 8,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                dollars = card.ability.extra.dollars
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            if #context.scoring_hand >= card.ability.extra.card_threshold then
+                card.ability.extra.dollars = card.ability.extra.dollars - card.ability.extra.dollars_gain
+                card.ability.extra.dollars = math.max(card.ability.extra.dollars, card.ability.extra.start_dollars)
+
+                if #context.scoring_hand > 0 then
+                    return {
+                        message = "-$" .. card.ability.extra.dollars_gain,
+                        colour = G.C.MONEY
+                    }
+                end
+            end
+        end
+
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            if G.GAME.blind.boss then
+                card.ability.extra.dollars = card.ability.extra.dollars + card.ability.extra.dollars_gain
+
+                return {
+                    message = "+$" .. card.ability.extra.dollars_gain,
+                    colour = G.C.MONEY
+                }
+            end
+        end
+    end
+}
+
+-- JOKER - TITANIUM PILE
+SMODS.Joker {
+    key = "titanium_pile",
+    loc_txt = {
+        name = "Titanium Pile",
+        text = {
+            "{C:chips}+#1#{} chips for every card scored",
+            "{C:red}Decrease{} by {C:chips}#2#{} after hand played",
+            "for each {C:attention}card scored",
+            "Increase by {C:chips}#3#{} after round",
+            "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#4#"
+        }
+    },
+
+    config = {
+        extra = {
+            start_chips = 10,
+            chips = 10,
+            chips_gain = 10,
+            chips_decrease = 2
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.chips,
+                card.ability.extra.chips_decrease,
+                card.ability.extra.chips_gain,
+                card.ability.extra.start_chips
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 4, y = 0 },
+    soul_pos = { x = 4, y = 1 },
+    cost = 6,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                chips = card.ability.extra.chips
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips - (card.ability.extra.chips_decrease * #context.scoring_hand)
+            card.ability.extra.chips = math.max(card.ability.extra.chips, card.ability.extra.start_chips)
+
+            if #context.scoring_hand > 0 then
+                return {
+                    message = "-" .. (card.ability.extra.chips_decrease * #context.scoring_hand),
+                    colour = G.C.CHIPS
+                }
+            end
+        end
+
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
+
+            return {
+                message = "+" .. card.ability.extra.chips_gain,
+                colour = G.C.CHIPS
+            }
+        end
+    end
+}
+
+-- JOKER - BRONZE PILE
+SMODS.Joker {
+    key = "bronze_pile",
+    loc_txt = {
+        name = "Bronze Pile",
+        text = {
+            "{C:mult}+#1#{} mult for every card scored",
+            "{C:red}Decrease{} by {C:mult}#2#{} after hand played",
+            "for every {C:attention}card scored{}",
+            "Increase by {C:mult}#3#{} after hand",
+            "if {C:attention}scored hand{} has {C:attention}#4#{} or less card",
+            "{C:inactive,s:0.7}Minimum {C:mult,s:0.7}#5#"
+        }
+    },
+
+    config = {
+        extra = {
+            start_mult = 1,
+            mult = 1,
+            mult_gain = 16,
+            mult_decrease = 2,
+            card_threshold = 3
+        }
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                card.ability.extra.mult,
+                card.ability.extra.mult_decrease,
+                card.ability.extra.mult_gain,
+                card.ability.extra.card_threshold,
+                card.ability.extra.start_mult
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 4, y = 2 },
+    soul_pos = { x = 4, y = 3 },
+    cost = 10,
+    blueprint_compat = true,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+
+        if context.after and context.cardarea == G.jokers and not context.blueprint then
+            local mult_delta = -(card.ability.extra.mult_decrease * #context.scoring_hand)
+            card.ability.extra.mult = card.ability.extra.mult + mult_delta
+            card.ability.extra.mult = math.max(card.ability.extra.mult, card.ability.extra.start_mult)
+
+            if #context.scoring_hand <= card.ability.extra.card_threshold then
+                mult_delta = mult_delta + card.ability.extra.mult_gain
+            end
+
+            if mult_delta >= 0 then
+                return {
+                    message = "+" .. mult_delta,
+                    colour = G.C.MULT
+                }
+            else
+                return {
+                    message = "-" .. mult_delta,
+                    colour = G.C.MULT
+                }
+            end
+        end
+    end
+}
+
 -- JOKER - HYDROGEN PILE
 SMODS.Joker {
     key = "hydrogen_pile",
@@ -763,156 +996,6 @@ SMODS.Joker {
                 card = card,
                 colour = pile_color
             }
-        end
-    end
-}
-
--- JOKER - TITANIUM PILE
-SMODS.Joker {
-    key = "titanium_pile",
-    loc_txt = {
-        name = "Titanium Pile",
-        text = {
-            "{C:chips}+#1#{} chips for every card scored",
-            "{C:red}Decrease{} by {C:chips}#2#{} after hand played",
-            "for each {C:attention}card scored",
-            "Increase by {C:chips}#3#{} after round",
-            "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#4#"
-        }
-    },
-
-    config = {
-        extra = {
-            start_chips = 10,
-            chips = 10,
-            chips_gain = 10,
-            chips_decrease = 2
-        }
-    },
-
-    loc_vars = function(self, info_queue, card)
-        return {
-            vars = {
-                card.ability.extra.chips,
-                card.ability.extra.chips_decrease,
-                card.ability.extra.chips_gain,
-                card.ability.extra.start_chips
-            }
-        }
-    end,
-
-    rarity = "mrzmd_pile",
-    atlas = "Piles",
-    pos = { x = 4, y = 0 },
-    soul_pos = { x = 4, y = 1 },
-    cost = 6,
-    blueprint_compat = true,
-
-    discovered = true,
-
-    calculate = function(self, card, context)
-        if context.cardarea == G.play and context.individual then
-            return {
-                chips = card.ability.extra.chips
-            }
-        end
-
-        if context.after and context.cardarea == G.jokers and not context.blueprint then
-            card.ability.extra.chips = card.ability.extra.chips - (card.ability.extra.chips_decrease * #context.scoring_hand)
-            card.ability.extra.chips = math.max(card.ability.extra.chips, card.ability.extra.start_chips)
-
-            if #context.scoring_hand > 0 then
-                return {
-                    message = "-" .. (card.ability.extra.chips_decrease * #context.scoring_hand),
-                    colour = G.C.CHIPS
-                }
-            end
-        end
-
-        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
-            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_gain
-
-            return {
-                message = "+" .. card.ability.extra.chips_gain,
-                colour = G.C.CHIPS
-            }
-        end
-    end
-}
-
--- JOKER - BRASS PILE
-SMODS.Joker {
-    key = "brass_pile",
-    loc_txt = {
-        name = "Brass Pile",
-        text = {
-            "{C:money}$#1#{} for every card scored",
-            "{C:red}Decrease{} by {C:money}$#2#{} after hand played",
-            "if {C:attention}scored hand{} contains {C:attention}#3#{} or more cards",
-            "Increase by {C:money}$#2#{} after boss blind",
-            "{C:inactive,s:0.7}Minimum {C:chips,s:0.7}#4#"
-        }
-    },
-
-    config = {
-        extra = {
-            start_dollars = 1,
-            dollars = 1,
-            dollars_gain = 2,
-            card_threshold = 4
-        }
-    },
-
-    loc_vars = function(self, info_queue, card)
-        return {
-            vars = {
-                card.ability.extra.dollars,
-                card.ability.extra.dollars_gain,
-                card.ability.extra.card_threshold,
-                card.ability.extra.start_dollars
-            }
-        }
-    end,
-
-    rarity = "mrzmd_pile",
-    atlas = "Piles",
-    pos = { x = 3, y = 2 },
-    soul_pos = { x = 3, y = 3 },
-    cost = 8,
-    blueprint_compat = true,
-
-    discovered = true,
-
-    calculate = function(self, card, context)
-        if context.cardarea == G.play and context.individual then
-            return {
-                dollars = card.ability.extra.dollars
-            }
-        end
-
-        if context.after and context.cardarea == G.jokers and not context.blueprint then
-            if #context.scoring_hand >= card.ability.extra.card_threshold then
-                card.ability.extra.dollars = card.ability.extra.dollars - card.ability.extra.dollars_gain
-                card.ability.extra.dollars = math.max(card.ability.extra.dollars, card.ability.extra.start_dollars)
-
-                if #context.scoring_hand > 0 then
-                    return {
-                        message = "-$" .. card.ability.extra.dollars_gain,
-                        colour = G.C.MONEY
-                    }
-                end
-            end
-        end
-
-        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
-            if G.GAME.blind.boss then
-                card.ability.extra.dollars = card.ability.extra.dollars + card.ability.extra.dollars_gain
-
-                return {
-                    message = "+$" .. card.ability.extra.dollars_gain,
-                    colour = G.C.MONEY
-                }
-            end
         end
     end
 }
