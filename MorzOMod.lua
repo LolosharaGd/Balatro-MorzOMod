@@ -1,6 +1,4 @@
 ---- TODO
---- Joker: Oxygen Pile
--- Retrigger every playing card
 --- Joker: Counterpart to Gold Pile
 --- Joker: Counterpart to Copper Pile
 
@@ -108,8 +106,7 @@ SMODS.Rarity {
     },
     pools = {
         ["Joker"] = true,
-        ["Joker"] = { rate = 0 },
-        ["Pile"] = true
+        ["Joker"] = { rate = 0 }
     },
     badge_colour = pile_color,
     default_weight = 0
@@ -546,11 +543,8 @@ SMODS.Joker {
     loc_txt = {
         name = "Hydrogen Pile",
         text = {
-            "{C:attention,E:1}Retrigger{} everything {V:1,E:1}#1#{} time(s)",
+            "{V:1,E:1}Retrigger{} everything {V:1,E:1}#1#{} time(s)",
             "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Retriggering Piles"
-        },
-        unlock = {
-            "Have at least {C:attention}5 {V:1}Pile{} jokers at once"
         }
     },
 
@@ -583,8 +577,7 @@ SMODS.Joker {
     cost = 20,
     eternal_compat = false,
 
-    --unlocked = false,
-    discovered = true, -- Testing
+    discovered = true,
 
     calculate = function(self, card, context)
         if context.repetition and not context.blueprint then
@@ -616,11 +609,8 @@ SMODS.Joker {
     loc_txt = {
         name = "Helium Pile",
         text = {
-            "{C:attention,E:1}Retrigger{} every {C:attention}joker {V:1,E:1}#1#{} time(s)",
+            "{V:1,E:1}Retrigger{} every {C:attention}joker {V:1,E:1}#1#{} time(s)",
             "{C:inactive,s:0.7}Doesn't retrigger other {V:1,s:0.7,E:2}Retriggering Piles"
-        },
-        unlock = {
-            "Get it through {V:1}Hydrogen Pile"
         }
     },
 
@@ -651,10 +641,8 @@ SMODS.Joker {
     pos = { x = 1, y = 2 },
     soul_pos = { x = 1, y = 3 },
     cost = 18,
-    eternal_compat = false,
 
-    --unlocked = false,
-    discovered = true, -- Testing
+    discovered = true,
 
     calculate = function(self, card, context)
         if context.retrigger_joker_check
@@ -665,6 +653,61 @@ SMODS.Joker {
             return {
                 repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
                 message = "Again!",
+                colour = pile_color
+            }
+        end
+    end
+}
+
+-- JOKER - OXYGEN PILE
+SMODS.Joker {
+    key = "oxygen_pile",
+    loc_txt = {
+        name = "Oxygen Pile",
+        text = {
+            "{V:1,E:1}Retrigger{} every {C:attention}playing card {V:1,E:1}#1#{} time(s)"
+        },
+        unlock = {
+            "Obtain it through {C:attention}Hydrogen Pile"
+        }
+    },
+
+    config = {
+        extra = {
+            retriggers = 1
+        },
+
+        immutable = {
+            max_retriggers = 50,
+            pile_not_retrigerrable = true
+        },
+    },
+    
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {
+                math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
+                colours = {
+                    pile_color
+                }
+            }
+        }
+    end,
+
+    rarity = "mrzmd_pile",
+    atlas = "Piles",
+    pos = { x = 2, y = 2 },
+    soul_pos = { x = 2, y = 3 },
+    cost = 18,
+
+    discovered = true,
+
+    calculate = function(self, card, context)
+        if context.repetition and not context.blueprint then
+            return {
+                repetitions = math.min(card.ability.extra.retriggers, card.ability.immutable.max_retriggers),
+                message = "Again!",
+                card = card,
                 colour = pile_color
             }
         end
